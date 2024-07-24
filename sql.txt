@@ -1,0 +1,81 @@
+#ΣΟΦΟΚΛΗΣ-ΙΩΑΝΝΗΣ ΜΙΧΟΠΟΥΛΟΣ 1115202100107
+#ΑΝΔΡΕΑΣ-ΣΥΜΕΩΝ ΦΡΑΝΤΖΗΣ 1115202100273
+
+#ΕΡΩΤΗΜΑΤΑ:
+
+#1
+select distinct e.name,e.surname
+from employees e, travel_guide tg,travel_guide_has_languages tghl, guided_tour gt,tourist_attraction ta, destination d
+where e.employees_AM = tg.travel_guide_employee_AM and tg.travel_guide_employee_AM = tghl.travel_guide_employee_AM and tghl.travel_guide_employee_AM = gt.travel_guide_employee_AM and gt.tourist_attraction_id = ta.tourist_attraction_id and d.destination_id = ta.destination_destination_id and d.country = 'Germany'
+order by e.name
+
+#2
+select tg.travel_guide_employee_AM,count( gt.tourist_attraction_id)
+from travel_guide tg,guided_tour gt, trip_package tp
+where tg.travel_guide_employee_AM =  gt.travel_guide_employee_AM and gt.trip_package_id = tp.trip_package_id  and tp.trip_start>='2019-01-01' and tp.trip_start<='2019-12-31'
+group by tg.travel_guide_employee_AM
+having count(gt.tourist_attraction_id)>3
+
+#3
+select tab.travel_agency_branch_id,count(e.employees_AM)
+from employees e,travel_agency_branch tab
+where e.travel_agency_branch_travel_agency_branch_id = tab.travel_agency_branch_id
+group by tab.travel_agency_branch_id
+order by tab.travel_agency_branch_id
+
+#4
+select  tp.trip_package_id,count( distinct r.Reservation_id)
+from trip_package tp, reservation r, destination d,trip_package_has_destination tphd
+where tp.trip_package_id = r.offer_trip_package_id  and tp.trip_start >= '2021-01-01' and tp.trip_end <= '2021-12-31' and tp.trip_package_id = tphd.trip_package_trip_package_id and tphd.destination_destination_id = d.destination_id and d.name = 'Paris'
+group by tp.trip_package_id
+order by tp.trip_package_id
+
+#5
+select distinct e.name,e.surname
+from employees e, travel_guide tg, travel_guide_has_languages tghl, guided_tour gt
+where e.employees_AM = tg.travel_guide_employee_AM and tg.travel_guide_employee_AM = tghl.travel_guide_employee_AM and tghl.languages_id = gt.travel_guide_language_id and tghl.travel_guide_employee_AM = gt.travel_guide_employee_AM and not exists(
+select distinct e2.name,e2.surname
+from guided_tour gt2,employees e2
+where gt2.travel_guide_language_id != gt.travel_guide_language_id and gt2.travel_guide_employee_AM = tg.travel_guide_employee_AM  and tg.travel_guide_employee_AM = e2.employees_AM)
+
+#6
+select 'yes' as answer 
+from offer o
+where  not exists(select *from reservation r where r.offer_id = o.offer_id)
+UNION
+select 'no' as answer 
+from offer o
+where exists(select *from reservation r where r.offer_id = o.offer_id)
+
+#7
+select t.name,t.surname
+from traveler t,trip_package tp,reservation r,offer o
+where t.age >= 40 and t.gender = 'male' and  tp.trip_package_id = o.trip_package_id and o.offer_id = r.offer_id and o.trip_package_id = r.offer_trip_package_id and r.Customer_id = t.traveler_id
+group by t.traveler_id
+having count(tp.trip_package_id)>3
+
+#8
+select   tg.travel_guide_employee_AM,e.name,e.surname, count(ta.tourist_attraction_id) 
+from employees e, travel_guide tg, travel_guide_has_languages tghl, languages l,guided_tour gt, tourist_attraction ta 
+where e.employees_AM = tg.travel_guide_employee_AM and tg.travel_guide_employee_AM = tghl.travel_guide_employee_AM and tghl.languages_id = l.languages_id and l.name = 'English' and tghl.languages_id = gt.travel_guide_language_id and  tghl.travel_guide_employee_AM = gt.travel_guide_employee_AM and gt.tourist_attraction_id = ta.tourist_attraction_id  
+group by tg.travel_guide_employee_AM,e.name,e.surname
+
+#9
+select d1.country
+from destination d1 , trip_package tp1,trip_package_has_destination tphd1 
+where tp1.trip_package_id = tphd1.trip_package_trip_package_id and tphd1.destination_destination_id = d1.destination_id
+group by d1.country
+having count( distinct tp1.trip_package_id)>=37
+
+#10
+select tp.trip_package_id
+from trip_package tp
+where not exists(
+select *
+from destination d
+where d.country = 'Ireland' and not exists (
+select *
+from  trip_package_has_destination tphd
+where tp.trip_package_id = tphd.trip_package_trip_package_id and tphd.destination_destination_id = d.destination_id))
+
+
